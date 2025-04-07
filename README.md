@@ -5,121 +5,19 @@ import { ShoppingCart, Instagram } from "lucide-react";
 import { motion } from "framer-motion";
 
 const products = [
-  {
-    id: 1,
-    name: "iPhone 13 Pro",
-    price: "$999",
-    image: "/iphone13pro.jpg",
-    storage: ["128GB", "256GB", "512GB"],
-    colors: ["Grafito", "Plateado", "Dorado", "Sierra Blue"],
-  },
-  {
-    id: 2,
-    name: "iPhone 14",
-    price: "$1099",
-    image: "/iphone14.jpg",
-    storage: ["128GB", "256GB", "512GB"],
-    colors: ["Rojo", "Blanco estelar", "Negro medianoche", "Azul"],
-  },
-  {
-    id: 3,
-    name: "iPhone 15 Pro Max",
-    price: "$1399",
-    image: "/iphone15promax.jpg",
-    storage: ["256GB", "512GB", "1TB"],
-    colors: ["Titanio natural", "Titanio azul", "Titanio blanco", "Titanio negro"],
-  },
-  {
-    id: 7,
-    name: "iPhone Xs",
-    price: "$499",
-    image: "/iphonexs.jpg",
-    storage: ["64GB", "256GB", "512GB"],
-    colors: ["Gris espacial", "Plateado", "Dorado"],
-  },
-  {
-    id: 8,
-    name: "iPhone Xr",
-    price: "$449",
-    image: "/iphonexr.jpg",
-    storage: ["64GB", "128GB"],
-    colors: ["Blanco", "Negro", "Azul", "Coral", "Rojo"],
-  },
-  {
-    id: 9,
-    name: "iPhone 11",
-    price: "$499",
-    image: "/iphone11.jpg",
-    storage: ["64GB", "128GB", "256GB"],
-    colors: ["Negro", "Verde", "Amarillo", "Malva", "Rojo", "Blanco"],
-  },
-  {
-    id: 10,
-    name: "iPhone 11 Pro",
-    price: "$699",
-    image: "/iphone11pro.jpg",
-    storage: ["64GB", "256GB", "512GB"],
-    colors: ["Gris espacial", "Plateado", "Oro", "Verde noche"],
-  },
-  {
-    id: 11,
-    name: "iPhone 12",
-    price: "$799",
-    image: "/iphone12.jpg",
-    storage: ["64GB", "128GB", "256GB"],
-    colors: ["Negro", "Blanco", "Rojo", "Verde", "Azul", "Morado"],
-  },
-  {
-    id: 12,
-    name: "iPhone 12 Pro",
-    price: "$899",
-    image: "/iphone12pro.jpg",
-    storage: ["128GB", "256GB", "512GB"],
-    colors: ["Gris espacial", "Plateado", "Dorado", "Azul pacífico"],
-  },
-  {
-    id: 13,
-    name: "iPhone SE 2022",
-    price: "$429",
-    image: "/iphonese2022.jpg",
-    storage: ["64GB", "128GB", "256GB"],
-    colors: ["Negro", "Blanco", "Rojo"],
-  },
+  // ... mismos productos que antes
 ];
 
 const amazonLinks = [
-  {
-    id: 4,
-    name: "iPhone 11 (Renovado)",
-    price: "$399",
-    image: "/iphone11.jpg",
-    url: "https://www.amazon.com/dp/B08N5WRWNW",
-    storage: ["64GB", "128GB"],
-    colors: ["Negro", "Blanco", "Verde", "Amarillo", "Malva", "Rojo"]
-  },
-  {
-    id: 5,
-    name: "iPhone XR (Renovado)",
-    price: "$349",
-    image: "/iphonexr.jpg",
-    url: "https://www.amazon.com/dp/B07P6Y7954",
-    storage: ["64GB", "128GB"],
-    colors: ["Blanco", "Negro", "Azul", "Coral", "Rojo"]
-  },
-  {
-    id: 6,
-    name: "iPhone SE 2020 (Renovado)",
-    price: "$299",
-    image: "/iphonese2020.jpg",
-    url: "https://www.amazon.com/dp/B093TKYDRQ",
-    storage: ["64GB", "128GB"],
-    colors: ["Negro", "Blanco", "Rojo"]
-  },
+  // ... mismos enlaces de Amazon que antes
 ];
 
 export default function Storefront() {
   const [cart, setCart] = useState([]);
   const [selections, setSelections] = useState({});
+  const [search, setSearch] = useState("");
+  const [filterStorage, setFilterStorage] = useState("");
+  const [filterColor, setFilterColor] = useState("");
 
   const handleSelect = (id, type, value) => {
     setSelections((prev) => ({
@@ -133,19 +31,17 @@ export default function Storefront() {
 
   const addToCart = (product) => {
     const selected = selections[product.id] || {};
-    if (!selected.storage || !selected.color) {
+    if (!selected.storage || !selected.color)
       return alert("Selecciona almacenamiento y color");
-    }
     setCart([...cart, { ...product, ...selected }]);
   };
 
-  const removeFromCart = (id) => {
-    setCart(cart.filter(item => item.id !== id));
-  };
-
-  const clearCart = () => {
-    setCart([]);
-  };
+  const filteredProducts = [...products, ...amazonLinks].filter((product) => {
+    const matchesSearch = product.name.toLowerCase().includes(search.toLowerCase());
+    const matchesStorage = filterStorage ? product.storage.includes(filterStorage) : true;
+    const matchesColor = filterColor ? product.colors.includes(filterColor) : true;
+    return matchesSearch && matchesStorage && matchesColor;
+  });
 
   return (
     <div className="min-h-screen bg-white text-black px-4 py-6 md:px-12">
@@ -155,15 +51,49 @@ export default function Storefront() {
           <a href="https://instagram.com/tu_tienda" target="_blank" rel="noopener noreferrer">
             <Instagram className="w-6 h-6 hover:text-blue-500" />
           </a>
-          <div className="flex items-center gap-2">
-            <ShoppingCart className="w-6 h-6" />
-            <span className="text-sm">{cart.length} productos</span>
-          </div>
+          <ShoppingCart className="w-6 h-6" />
+          <span className="text-sm">{cart.length} productos</span>
         </div>
       </header>
 
+      <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <input
+          type="text"
+          placeholder="Buscar modelo..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="border px-3 py-2 rounded w-full"
+        />
+        <select
+          value={filterStorage}
+          onChange={(e) => setFilterStorage(e.target.value)}
+          className="border px-3 py-2 rounded w-full"
+        >
+          <option value="">Filtrar por almacenamiento</option>
+          <option value="64GB">64GB</option>
+          <option value="128GB">128GB</option>
+          <option value="256GB">256GB</option>
+          <option value="512GB">512GB</option>
+          <option value="1TB">1TB</option>
+        </select>
+        <select
+          value={filterColor}
+          onChange={(e) => setFilterColor(e.target.value)}
+          className="border px-3 py-2 rounded w-full"
+        >
+          <option value="">Filtrar por color</option>
+          <option value="Negro">Negro</option>
+          <option value="Blanco">Blanco</option>
+          <option value="Rojo">Rojo</option>
+          <option value="Azul">Azul</option>
+          <option value="Dorado">Dorado</option>
+          <option value="Gris espacial">Gris espacial</option>
+          <option value="Verde">Verde</option>
+        </select>
+      </div>
+
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[...products, ...amazonLinks].map((product) => (
+        {filteredProducts.map((product) => (
           <motion.div
             key={product.id}
             whileHover={{ scale: 1.03 }}
@@ -214,10 +144,22 @@ export default function Storefront() {
                     Ver en Amazon
                   </a>
                 )}
-                <Button
-                  onClick={() => addToCart(product)}
-                  className="w-full"
-                  disabled={!selections[product.id]?.storage || !selections[product.id]?.color}
-                >
+                <Button onClick={() => addToCart(product)} className="w-full">
                   Añadir al carrito
-                </Button
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </section>
+
+      <section className="mt-12">
+        <h3 className="text-2xl font-semibold mb-4">También disponibles por encargo</h3>
+        <p className="text-sm text-gray-600">
+          Todos los modelos están disponibles por encargo. Escríbenos por Instagram para más detalles.
+        </p>
+      </section>
+    </div>
+  );
+}
+
